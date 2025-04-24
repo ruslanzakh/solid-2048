@@ -7,7 +7,7 @@ type BoardProps = {
 
 export function Board(props: BoardProps) {
   return (
-    <div class="grid grid-cols-4 gap-2 bg-gray-300 p-2 rounded">
+    <div class="grid grid-cols-4 gap-2 bg-gray-300 dark:bg-gray-700 p-2 rounded transition-colors">
       <For each={props.board}>
         {(row) => (
           <For each={row}>
