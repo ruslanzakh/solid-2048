@@ -19,7 +19,7 @@ export function addRandomTile(board: number[][], setBoard: Setter<number[][]>) {
   
   // Generate 2 or 4 (with 90% probability of 2)
   const value = Math.random() < 0.9 ? 2 : 4;
-  
+
   
   // Update the board using setState, not by directly mutating
   setBoard(board => {
@@ -74,7 +74,6 @@ export function moveLeft(
 ): boolean {
   let moved = false;
   const newBoard = board.map(row => [...row]);
-  console.log('tick')
   for (let i = 0; i < 4; i++) {
     // Array to track tiles that have already been merged in this move
     const mergedTiles = [false, false, false, false];

@@ -1,3 +1,16 @@
+# Solid 2048
+
+A 2048 game implementation using SolidJS and TailwindCSS. This project was created as a pet project to learn and practice SolidJS, Typescript, and TailwindCSS.
+
+## Features
+
+- Classic 2048 gameplay
+- Responsive design
+- Score tracking
+- Dark mode support
+- Built with SolidJS for reactivity
+- Styled with TailwindCSS
+
 ## Usage
 
 ```bash
@@ -23,6 +36,14 @@ It correctly bundles Solid in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
+### `npm test`
+
+Runs the test suite using Vitest.
+
 ## Deployment
 
 Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
