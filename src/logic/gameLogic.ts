@@ -1,10 +1,9 @@
-import { Accessor, Setter } from "solid-js";
+import { Setter } from "solid-js";
 
-// Добавляет случайную плитку (2 или 4) на пустое место
 export function addRandomTile(board: number[][], setBoard: Setter<number[][]>) {
   const emptyCells: [number, number][] = [];
   
-  // Находим все пустые ячейки
+  // Find all empty cells
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (board[i][j] === 0) {
@@ -15,21 +14,28 @@ export function addRandomTile(board: number[][], setBoard: Setter<number[][]>) {
 
   if (emptyCells.length === 0) return;
 
-  // Выбираем случайную пустую ячейку
+  // Choose a random empty cell
   const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
   
-  // Генерируем 2 или 4 (с вероятностью 90% будет 2)
+  // Generate 2 or 4 (with 90% probability of 2)
   const value = Math.random() < 0.9 ? 2 : 4;
   
-  // Обновляем доску
-  const newBoard = [...board];
-  newBoard[row][col] = value;
-  setBoard(newBoard);
+  
+  // Update the board using setState, not by directly mutating
+  setBoard(board => {
+    return board.map((rowArr, rowIndex) =>
+      rowIndex === row
+        ? rowArr.map((cell, colIndex) => 
+            colIndex === col ? value : cell
+          )
+        : [...rowArr]
+    );
+  });
 }
 
-// Проверка окончания игры
+// Check if game is over
 export function checkGameOver(board: number[][]): boolean {
-  // Проверяем наличие пустых ячеек
+  // Check for empty cells
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (board[i][j] === 0) {
@@ -38,7 +44,7 @@ export function checkGameOver(board: number[][]): boolean {
     }
   }
   
-  // Проверяем возможность слияния по горизонтали
+  // Check for possible horizontal merges
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 3; j++) {
       if (board[i][j] === board[i][j + 1]) {
@@ -47,7 +53,7 @@ export function checkGameOver(board: number[][]): boolean {
     }
   }
   
-  // Проверяем возможность слияния по вертикали
+  // Check for possible vertical merges
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 4; j++) {
       if (board[i][j] === board[i + 1][j]) {
@@ -56,11 +62,11 @@ export function checkGameOver(board: number[][]): boolean {
     }
   }
   
-  // Если нет пустых ячеек и нет возможности слияния
+  // If no empty cells and no possible merges
   return true;
 }
 
-// Перемещение влево
+// Move tiles left
 export function moveLeft(
   board: number[][], 
   setBoard: Setter<number[][]>,
@@ -68,12 +74,17 @@ export function moveLeft(
 ): boolean {
   let moved = false;
   const newBoard = board.map(row => [...row]);
-  
+  console.log('tick')
   for (let i = 0; i < 4; i++) {
-    // Сдвигаем все плитки влево
+    // Array to track tiles that have already been merged in this move
+    const mergedTiles = [false, false, false, false];
+    
+    // Shift and merge tiles from left to right
     for (let j = 1; j < 4; j++) {
       if (newBoard[i][j] !== 0) {
         let k = j;
+        
+        // Shift the tile left until it hits another tile or the edge
         while (k > 0 && newBoard[i][k - 1] === 0) {
           newBoard[i][k - 1] = newBoard[i][k];
           newBoard[i][k] = 0;
@@ -81,11 +92,13 @@ export function moveLeft(
           moved = true;
         }
         
-        // Слияние одинаковых плиток
-        if (k > 0 && newBoard[i][k - 1] === newBoard[i][k]) {
+        // Merge identical tiles, but only if the target tile hasn't been merged in this move
+        if (k > 0 && newBoard[i][k - 1] === newBoard[i][k] && !mergedTiles[k - 1]) {
           newBoard[i][k - 1] *= 2;
           newBoard[i][k] = 0;
           setScore(prev => prev + newBoard[i][k - 1]);
+          // Mark this tile as already merged
+          mergedTiles[k - 1] = true;
           moved = true;
         }
       }
@@ -99,7 +112,7 @@ export function moveLeft(
   return moved;
 }
 
-// Перемещение вправо
+// Move tiles right
 export function moveRight(
   board: number[][], 
   setBoard: Setter<number[][]>,
@@ -109,7 +122,10 @@ export function moveRight(
   const newBoard = board.map(row => [...row]);
   
   for (let i = 0; i < 4; i++) {
-    // Сдвигаем все плитки вправо
+    // Array to track tiles that have already been merged in this move
+    const mergedTiles = [false, false, false, false];
+    
+    // Shift all tiles right
     for (let j = 2; j >= 0; j--) {
       if (newBoard[i][j] !== 0) {
         let k = j;
@@ -120,11 +136,13 @@ export function moveRight(
           moved = true;
         }
         
-        // Слияние одинаковых плиток
-        if (k < 3 && newBoard[i][k + 1] === newBoard[i][k]) {
+        // Merge identical tiles, but only if the target tile hasn't been merged
+        if (k < 3 && newBoard[i][k + 1] === newBoard[i][k] && !mergedTiles[k + 1]) {
           newBoard[i][k + 1] *= 2;
           newBoard[i][k] = 0;
           setScore(prev => prev + newBoard[i][k + 1]);
+          // Mark this tile as already merged
+          mergedTiles[k + 1] = true;
           moved = true;
         }
       }
@@ -138,7 +156,7 @@ export function moveRight(
   return moved;
 }
 
-// Перемещение вверх
+// Move tiles up
 export function moveUp(
   board: number[][], 
   setBoard: Setter<number[][]>,
@@ -148,7 +166,10 @@ export function moveUp(
   const newBoard = board.map(row => [...row]);
   
   for (let j = 0; j < 4; j++) {
-    // Сдвигаем все плитки вверх
+    // Array to track tiles that have already been merged in this move
+    const mergedTiles = [false, false, false, false];
+    
+    // Shift all tiles up
     for (let i = 1; i < 4; i++) {
       if (newBoard[i][j] !== 0) {
         let k = i;
@@ -159,11 +180,13 @@ export function moveUp(
           moved = true;
         }
         
-        // Слияние одинаковых плиток
-        if (k > 0 && newBoard[k - 1][j] === newBoard[k][j]) {
+        // Merge identical tiles, but only if the target tile hasn't been merged
+        if (k > 0 && newBoard[k - 1][j] === newBoard[k][j] && !mergedTiles[k - 1]) {
           newBoard[k - 1][j] *= 2;
           newBoard[k][j] = 0;
           setScore(prev => prev + newBoard[k - 1][j]);
+          // Mark this tile as already merged
+          mergedTiles[k - 1] = true;
           moved = true;
         }
       }
@@ -177,7 +200,7 @@ export function moveUp(
   return moved;
 }
 
-// Перемещение вниз
+// Move tiles down
 export function moveDown(
   board: number[][], 
   setBoard: Setter<number[][]>,
@@ -187,7 +210,10 @@ export function moveDown(
   const newBoard = board.map(row => [...row]);
   
   for (let j = 0; j < 4; j++) {
-    // Сдвигаем все плитки вниз
+    // Array to track tiles that have already been merged in this move
+    const mergedTiles = [false, false, false, false];
+    
+    // Shift all tiles down
     for (let i = 2; i >= 0; i--) {
       if (newBoard[i][j] !== 0) {
         let k = i;
@@ -198,11 +224,13 @@ export function moveDown(
           moved = true;
         }
         
-        // Слияние одинаковых плиток
-        if (k < 3 && newBoard[k + 1][j] === newBoard[k][j]) {
+        // Merge identical tiles, but only if the target tile hasn't been merged
+        if (k < 3 && newBoard[k + 1][j] === newBoard[k][j] && !mergedTiles[k + 1]) {
           newBoard[k + 1][j] *= 2;
           newBoard[k][j] = 0;
           setScore(prev => prev + newBoard[k + 1][j]);
+          // Mark this tile as already merged
+          mergedTiles[k + 1] = true;
           moved = true;
         }
       }
