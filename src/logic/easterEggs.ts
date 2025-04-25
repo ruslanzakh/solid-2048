@@ -1,4 +1,75 @@
 
+
+
+
+export function doggy() {
+  "use strict"
+
+  let data = 'https://i.imgur.com/PwxV3zM.gif'
+
+  let doggy = function () {
+
+    var img = new Image()
+    img.src = data
+    img.style.width = '450px'
+    img.style.height = '350px'
+    img.style.transition = '4s all linear'
+    img.style.position = 'fixed'
+    img.style.left = '-400px'
+    img.style.bottom = 'calc(-50% + 300px)'
+    img.style.zIndex = '999999'
+
+    document.body.appendChild(img)
+    window.setTimeout(function () {
+      img.style.left = 'calc(100% + 500px)'
+    }, 50)
+
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+    }, 6000)
+
+  }
+
+
+  doggy()
+}
+
+
+export function joker() {
+  "use strict";
+
+  var data = 'https://i.imgur.com/vQv7oBY.gif'
+  var joker = function () {
+
+    var img = new Image();
+    img.src = data;
+    img.style.width = '374px';
+    img.style.height = '375px';
+    img.style.transition = '13s all';
+    img.style.position = 'fixed';
+    img.style.right = '-374px';
+    img.style.bottom = 'calc(-50% + 320px)';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.right = 'calc(100% + 500px)';
+    }, 50);
+
+
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+    }, 10300);
+
+  };
+  joker();
+}
+
 export function unicorn() {
   "use strict";
 

@@ -2,7 +2,14 @@ import { createStore } from "solid-js/store";
 import { moveLeft, moveRight, moveUp, moveDown, addRandomTile, checkGameOver } from "../logic/gameLogic";
 import { batch } from "solid-js";
 // @ts-ignore
-import { koggy, pikachu, cool, wink, winner, jump, unicorn } from '../logic/easterEggs';
+import { koggy, pikachu, cool, wink, winner, jump, unicorn, joker, doggy } from '../logic/easterEggs';
+
+// Тип для сохранения полного состояния игры
+type GameHistoryState = {
+  board: number[][];
+  score: number;
+  newTile: {row: number, col: number};
+};
 
 export type GameState = {
   board: number[][];
@@ -15,6 +22,12 @@ export type GameState = {
   has512Appeared: boolean;
   has1024Appeared: boolean;
   has2048Appeared: boolean;
+  // История предыдущих состояний
+  history: GameHistoryState[];
+  // Можно ли отменить ход
+  canUndo: boolean;
+  // Счетчик для чередования пасхалок при отмене хода
+  undoCounter: number;
 };
 
 export const useGameStore = () => {
@@ -34,7 +47,10 @@ export const useGameStore = () => {
     has256Appeared: false,
     has512Appeared: false,
     has1024Appeared: false,
-    has2048Appeared: false
+    has2048Appeared: false,
+    history: [],
+    canUndo: false,
+    undoCounter: 0
   });
 
   const checkEasterEggs = () => {
@@ -46,9 +62,60 @@ export const useGameStore = () => {
     if(!checkFor2048Tile()) return;
   };
 
-  const setBoard = (board: number[][] | ((prev: number[][]) => number[][])) => {
-    setState("board", board);
+  // Function for saving the current state to history before changing
+  const saveStateToHistory = () => {
+    // Create a copy of the current state board
+    const currentBoard = state.board.map(row => [...row]);
     
+    // Create a new history object
+    const historyItem: GameHistoryState = {
+      board: currentBoard,
+      score: state.score,
+      newTile: {...state.newTile}
+    };
+    
+    // Add to history, limiting it to 5 last states
+    const newHistory = [historyItem, ...state.history];
+    if (newHistory.length > 5) {
+      newHistory.pop(); // Remove the oldest state if there are more than 5
+    }
+    
+    setState('history', newHistory);
+    setState('canUndo', true);
+  };
+  
+  // Function for returning to the previous state
+  const undoMove = () => {
+    if (!state.canUndo || state.history.length === 0) return false;
+    
+    // Get the last saved state
+    const lastState = state.history[0];
+    const newHistory = state.history.slice(1);
+    
+    if (state.undoCounter % 2 === 0) {
+      joker();
+    } else {
+      doggy();
+    }
+    
+    // Increase the counter of clicks
+    
+    // Update the game state
+    batch(() => {
+      setState('undoCounter', state.undoCounter + 1);
+      setState('board', lastState.board.map(row => [...row]));
+      setState('score', lastState.score);
+      setState('newTile', {...lastState.newTile});
+      setState('history', newHistory);
+      setState('canUndo', newHistory.length > 0);
+    });
+    
+    return true;
+  };
+
+  const setBoard = (board: number[][] | ((prev: number[][]) => number[][])) => {
+    // Теперь мы не сохраняем состояние здесь, а делаем это явно в функции makeMove
+    setState("board", board);
     checkEasterEggs();
   };
 
@@ -155,6 +222,22 @@ export const useGameStore = () => {
     return isGameOver;
   };
 
+  // Make a move
+  const makeMove = (moveFn: (board: number[][], setBoard: any, setScore: any) => boolean) => {
+    // Save the current state before making the move
+    saveStateToHistory();
+    
+    // Perform the move
+    const moved = moveFn(state.board, setBoard, setScore);
+    
+    if (moved) {
+      addRandomTileInternal();
+      checkGameOverInternal();
+    }
+    
+    return moved;
+  };
+
   // Initialize the game
   const initGame = () => {
     batch(() => {
@@ -173,9 +256,13 @@ export const useGameStore = () => {
         has256Appeared: false,
         has512Appeared: false,
         has1024Appeared: false,
-        has2048Appeared: false
+        has2048Appeared: false,
+        history: [],
+        canUndo: false,
+        undoCounter: 0
       });
     
+      // Add initial tiles without saving history
       addRandomTileInternal();
       addRandomTileInternal();
     });
@@ -191,33 +278,30 @@ export const useGameStore = () => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (state.gameOver) return;
 
-    let moved = false;
-
     batch(() => {
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          moved = moveUp(state.board, setBoard, setScore);
+          makeMove(moveUp);
           break;
         case 'ArrowDown':
           e.preventDefault();
-          moved = moveDown(state.board, setBoard, setScore);
+          makeMove(moveDown);
           break;
         case 'ArrowLeft':
           e.preventDefault();
-          moved = moveLeft(state.board, setBoard, setScore);
+          makeMove(moveLeft);
           break;
         case 'ArrowRight':
           e.preventDefault();
-          moved = moveRight(state.board, setBoard, setScore);
+          makeMove(moveRight);
           break;
+        case 'Backspace':  // Add support for undoing a move through the Backspace key
+          e.preventDefault();
+          undoMove();
+          return;
         default:
           return; // Ignore other keys
-      }
-
-      if (moved) {
-        addRandomTileInternal();
-        checkGameOverInternal();
       }
     });
   };
@@ -227,6 +311,7 @@ export const useGameStore = () => {
     state,
     initGame,
     resetGame,
-    handleKeyDown
+    handleKeyDown,
+    undoMove
   };
 }; 

@@ -9,7 +9,7 @@ import { useSwipe, Direction } from './hooks/useSwipe'
 
 function App() {
   const gameStore = useGameStore();
-  const { state, initGame, resetGame, handleKeyDown } = gameStore;
+  const { state, initGame, resetGame, handleKeyDown, undoMove } = gameStore;
   const [boardRef, setBoardRef] = createSignal<HTMLDivElement | null>(null);
 
   // Function for handling movements (from buttons or swipes)
@@ -67,7 +67,12 @@ function App() {
           <h1 class="text-2xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white">2048</h1>
           <ThemeToggle />
         </div>
-        <ScoreBoard score={state.score} resetGame={resetGame} />
+        <ScoreBoard 
+          score={state.score} 
+          resetGame={resetGame} 
+          undoMove={undoMove}
+          canUndo={state.canUndo}
+        />
         <div ref={setBoardRef} class="touch-none">
           <Board board={state.board} newTile={state.newTile} />
         </div>
@@ -77,8 +82,8 @@ function App() {
         <Controls onMove={handleMove} />
         
         <div class="mt-4 text-gray-600 dark:text-gray-300 text-sm transition-colors">
-          <p class="hidden md:block">Use arrow keys to move the tiles.</p>
-          <p class="md:hidden">Swipe or use buttons to move the tiles.</p>
+          <p class="hidden md:block">Use arrow keys to move the tiles. Press Backspace to undo.</p>
+          <p class="md:hidden">Swipe or use buttons to move the tiles. Use Back button to undo.</p>
         </div>
       </div>
     </div>
