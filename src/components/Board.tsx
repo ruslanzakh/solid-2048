@@ -14,7 +14,7 @@ const isNewTile = (row: number, col: number, newTile: {row: number, col: number}
 
 export function Board(props: BoardProps) {
   return (
-    <div class="grid grid-cols-4 gap-2 bg-gray-300 dark:bg-gray-700 p-2 rounded transition-colors">
+    <div class="grid grid-cols-4 gap-1 sm:gap-2 bg-gray-300 dark:bg-gray-700 p-2 rounded transition-colors">
       <For each={props.board}>
         {(row, rowIndex) => (
           <For each={row}>

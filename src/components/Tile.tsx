@@ -16,15 +16,15 @@ export function Tile(props: TileProps) {
       case 128: return 'bg-yellow-400 dark:bg-yellow-500 text-white';
       case 256: return 'bg-yellow-500 dark:bg-yellow-600 text-white';
       case 512: return 'bg-yellow-600 dark:bg-yellow-700 text-white';
-      case 1024: return 'bg-yellow-700 dark:bg-yellow-800 text-white';
-      case 2048: return 'bg-yellow-800 dark:bg-yellow-900 text-white';
-      default: return 'bg-yellow-800 dark:bg-yellow-900 text-white';
+      case 1024: return 'bg-yellow-700 dark:bg-yellow-800 text-white text-sm sm:text-base';
+      case 2048: return 'bg-yellow-800 dark:bg-yellow-900 text-white text-sm sm:text-base';
+      default: return 'bg-yellow-800 dark:bg-yellow-900 text-white text-sm sm:text-base';
     }
   };
 
   const animationClass = props.isNew && props.value !== 0 ? 'tile-appear' : '';
   return (
-    <div class={`w-16 h-16 flex items-center justify-center rounded font-bold text-xl ${getTileClass(props.value)} transition-colors ${animationClass}`}>
+    <div class={`w-full h-auto aspect-square flex items-center justify-center rounded font-bold text-base sm:text-xl ${getTileClass(props.value)} transition-colors ${animationClass} select-none pointer-events-none`}>
       {props.value !== 0 ? props.value : ''}
     </div>
   );
