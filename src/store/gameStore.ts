@@ -1,9 +1,12 @@
 import { createStore } from "solid-js/store";
 import { moveLeft, moveRight, moveUp, moveDown, addRandomTile, checkGameOver } from "../logic/gameLogic";
+import { batch } from "solid-js";
+
 export type GameState = {
   board: number[][];
   score: number;
   gameOver: boolean;
+  newTile: {row: number, col: number};
 };
 
 export const useGameStore = () => {
@@ -16,7 +19,8 @@ export const useGameStore = () => {
       [0, 0, 0, 0]
     ],
     score: 0,
-    gameOver: false
+    gameOver: false,
+    newTile: {row: -1, col: -1}
   });
 
   
@@ -30,7 +34,11 @@ export const useGameStore = () => {
 
   // Adds a random tile (2 or 4) to an empty cell
   const addRandomTileInternal = () => {
-    addRandomTile(state.board, setBoard);
+    
+    const newTilePosition = addRandomTile(state.board, setBoard);
+    if (newTilePosition) {
+      setState("newTile", newTilePosition);
+    }
   };
 
   // Check if the game is over
@@ -44,12 +52,7 @@ export const useGameStore = () => {
 
   // Initialize the game
   const initGame = () => {
-    addRandomTileInternal();
-    addRandomTileInternal();
-  };
-
-  // Reset the game
-  const resetGame = () => {
+    batch(() => {
     setState({
       board: [
         [0, 0, 0, 0],
@@ -58,11 +61,18 @@ export const useGameStore = () => {
         [0, 0, 0, 0]
       ],
       score: 0,
-      gameOver: false
+      gameOver: false,
+      newTile: {row: -1, col: -1}
     });
     
     addRandomTileInternal();
     addRandomTileInternal();
+  });
+  };
+
+  // Reset the game
+  const resetGame = () => {
+    initGame();
   };
 
   // Handle key press
@@ -71,32 +81,33 @@ export const useGameStore = () => {
 
     let moved = false;
 
-    
-    switch (e.key) {
-      case 'ArrowUp':
-        e.preventDefault();
-        moved = moveUp(state.board, setBoard, setScore);
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        moved = moveDown(state.board, setBoard, setScore);
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        moved = moveLeft(state.board, setBoard, setScore);
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        moved = moveRight(state.board, setBoard, setScore);
-        break;
-      default:
-        return; // Ignore other keys
-    }
+    batch(() => {
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          moved = moveUp(state.board, setBoard, setScore);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          moved = moveDown(state.board, setBoard, setScore);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          moved = moveLeft(state.board, setBoard, setScore);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          moved = moveRight(state.board, setBoard, setScore);
+          break;
+        default:
+          return; // Ignore other keys
+      }
 
-    if (moved) {
-      addRandomTileInternal();
-      checkGameOverInternal();
-    }
+      if (moved) {
+        addRandomTileInternal();
+        checkGameOverInternal();
+      }
+    });
   };
 
   // Return state and methods to work with it

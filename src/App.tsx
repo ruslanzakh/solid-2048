@@ -31,7 +31,7 @@ function App() {
           <ThemeToggle />
         </div>
         <ScoreBoard score={state.score} resetGame={resetGame} />
-        <Board board={state.board} />
+        <Board board={state.board} newTile={state.newTile} />
         <GameOver isGameOver={state.gameOver} />
         <div class="mt-4 text-gray-600 dark:text-gray-300 text-sm transition-colors">
           Use arrow keys to move the tiles.

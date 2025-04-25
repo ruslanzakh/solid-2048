@@ -1,5 +1,6 @@
 type TileProps = {
   value: number;
+  isNew?: boolean;
 };
 
 export function Tile(props: TileProps) {
@@ -21,8 +22,9 @@ export function Tile(props: TileProps) {
     }
   };
 
+  const animationClass = props.isNew && props.value !== 0 ? 'tile-appear' : '';
   return (
-    <div class={`w-16 h-16 flex items-center justify-center rounded font-bold text-xl ${getTileClass(props.value)} transition-colors`}>
+    <div class={`w-16 h-16 flex items-center justify-center rounded font-bold text-xl ${getTileClass(props.value)} transition-colors ${animationClass}`}>
       {props.value !== 0 ? props.value : ''}
     </div>
   );

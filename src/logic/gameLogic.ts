@@ -1,37 +1,41 @@
 import { Setter } from "solid-js";
 
-export function addRandomTile(board: number[][], setBoard: Setter<number[][]>) {
-  const emptyCells: [number, number][] = [];
-  
+// Add a random tile (2 or 4) to an empty cell
+export const addRandomTile = (
+  board: number[][],
+  setBoard: (board: number[][] | ((prev: number[][]) => number[][])) => void
+): {row: number, col: number} | null => {
   // Find all empty cells
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      if (board[i][j] === 0) {
-        emptyCells.push([i, j]);
+  const emptyCells: {row: number, col: number}[] = [];
+  
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      if (board[row][col] === 0) {
+        emptyCells.push({row, col});
       }
     }
   }
-
-  if (emptyCells.length === 0) return;
-
+  
+  // If there are no empty cells, return null
+  if (emptyCells.length === 0) {
+    return null;
+  }
+  
   // Choose a random empty cell
-  const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  const randomIndex = Math.floor(Math.random() * emptyCells.length);
+  const {row, col} = emptyCells[randomIndex];
   
-  // Generate 2 or 4 (with 90% probability of 2)
-  const value = Math.random() < 0.9 ? 2 : 4;
-
+  // Place a random tile (2 or 4) in the cell
+  const newValue = Math.random() < 0.9 ? 2 : 4;
   
-  // Update the board using setState, not by directly mutating
-  setBoard(board => {
-    return board.map((rowArr, rowIndex) =>
-      rowIndex === row
-        ? rowArr.map((cell, colIndex) => 
-            colIndex === col ? value : cell
-          )
-        : [...rowArr]
-    );
-  });
-}
+  // Update the board
+  const newBoard = board.map(rowArray => [...rowArray]);
+  newBoard[row][col] = newValue;
+  setBoard(newBoard);
+  
+  // Return the position of the new tile
+  return {row, col};
+};
 
 // Check if game is over
 export function checkGameOver(board: number[][]): boolean {

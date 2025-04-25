@@ -40,9 +40,8 @@ describe('gameLogic', () => {
       // that one cell contains 2 and the rest are 0
       expect(setBoard).toHaveBeenCalled();
       const calledBoard = setBoard.mock.calls[0][0];
-      console.log("calledBoard", calledBoard);
       // Check that the board contains exactly one tile with value 2
-      const flattenedBoard = calledBoard(board).flat();
+      const flattenedBoard = calledBoard.flat();
       expect(flattenedBoard.filter((cell: number) => cell === 2)).toHaveLength(1);
       expect(flattenedBoard.filter((cell: number) => cell === 0)).toHaveLength(15);
     });
@@ -69,7 +68,7 @@ describe('gameLogic', () => {
       const calledBoard = setBoard.mock.calls[0][0];
       
       // Check that the board contains exactly one tile with value 4
-      const flattenedBoard = calledBoard(board).flat();
+      const flattenedBoard = calledBoard.flat();
       expect(flattenedBoard.filter((cell: number) => cell === 4)).toHaveLength(1);
       expect(flattenedBoard.filter((cell: number) => cell === 0)).toHaveLength(15);
     });
