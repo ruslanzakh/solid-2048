@@ -1,4 +1,251 @@
 
+export function unicorn() {
+  "use strict";
+
+  var data = "https://weichiachang.github.io/easter-eggs-mobile/images/unicorn.gif"
+
+  var unicorn = function () {
+
+    var img = new Image();
+    img.src = data;
+    img.style.width = '375px';
+    img.style.height = '375px';
+    img.style.transition = '13s all';
+    img.style.position = 'fixed';
+    img.style.right = '-374px';
+    img.style.top = '100px';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.right = 'calc(100% + 500px)';
+    }, 50);
+
+
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+    }, 10300);
+
+  };
+
+  unicorn()
+}
+
+export function jump() {
+  "use strict";
+
+
+  var data = 'https://i.imgur.com/sxCEpfI.gif'
+
+  var jump = function () {
+
+    var shock = document.createElement('div');
+    var img = new Image;
+    img.src = data;
+    img.style.width = '350px';
+    img.style.height = '300px';
+    img.style.transition = '1s all';
+    img.style.position = 'fixed';
+    img.style.left = 'calc(50% - 180px)';
+    img.style.bottom = '-450px';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.bottom = '0px';
+    }, 30);
+
+    window.setTimeout(function () {
+      img.style.bottom = '-450px';
+    }, 4300);
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+      if (shock.parentNode) {
+        shock.parentNode.removeChild(shock);
+      }
+    }, 5400);
+
+  };
+  jump()
+}
+
+
+export function winner() {
+  "use strict";
+
+
+  var data = 'https://i.imgur.com/5JNiPcT.gif'
+
+  var winner = function () {
+
+    var shock = document.createElement('div');
+    var img = new Image;
+    img.src = data;
+    img.style.width = '450px';
+    img.style.height = '400px';
+    img.style.transition = '1s all';
+    img.style.position = 'fixed';
+    img.style.left = 'calc(50% - 200px)';
+    img.style.bottom = '-400px';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.bottom = '-65px';
+    }, 30);
+
+    window.setTimeout(function () {
+      img.style.bottom = '-600px';
+    }, 4300);
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+      if (shock.parentNode) {
+        shock.parentNode.removeChild(shock);
+      }
+    }, 5400);
+
+  };
+  winner();
+}
+
+
+
+
+export function wink () {
+  "use strict";
+  
+  
+    var wink = function() {
+      var data = 'https://weichiachang.github.io/easter-eggs-mobile/images/wink.gif';
+  
+      var shock = document.createElement('div');
+      var img = new Image;
+      img.src = data;
+      img.style.width = '300px';
+      img.style.height = '300px';
+      img.style.transition = '1s all';
+      img.style.position = 'fixed';
+      img.style.left = 'calc(50% - 300px)';
+      img.style.bottom = '-600px';
+      img.style.zIndex = '999999';
+  
+      document.body.appendChild(img);
+  
+      window.setTimeout(function(){
+        img.style.bottom = '0px';
+      },30);
+  
+      window.setTimeout(function(){
+        img.style.bottom = '-600px';
+      }, 4300);
+      window.setTimeout(function(){
+        if (img.parentNode) {
+          img.parentNode.removeChild(img);
+        }
+        if (shock.parentNode) {
+          shock.parentNode.removeChild(shock);
+        }
+      }, 5400);
+  
+    };
+  wink();
+}
+
+
+
+
+export function cool() {
+  "use strict";
+
+  var cool = function () {
+
+    var data = 'https://i.imgur.com/9ILLXpb.gif';
+    var img = new Image;
+    img.src = data;
+    img.style.width = '400px';
+    img.style.height = '400px';
+    img.style.transition = '1s all';
+    img.style.position = 'fixed';
+    img.style.left = 'calc(50% - 200px)';
+    img.style.bottom = '0px';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.bottom = '0px';
+    }, 30);
+
+    window.setTimeout(function () {
+      img.style.bottom = '-600px';
+    }, 4300);
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+    }, 5400);
+
+  };
+
+
+  cool();
+}
+
+
+export function koggy() {
+  "use strict";
+
+
+  var data = 'https://i.imgur.com/oWCAG1f.gif'
+
+  var koggy = function () {
+
+    var shock = document.createElement('div');
+    var img = new Image;
+    img.src = data;
+    img.style.width = '250px';
+    img.style.height = '149px';
+    img.style.transition = '1s all';
+    img.style.position = 'fixed';
+    img.style.left = 'calc(50% - 125px)';
+    img.style.bottom = '-149px';
+    img.style.zIndex = '999999';
+
+    document.body.appendChild(img);
+
+    window.setTimeout(function () {
+      img.style.bottom = '0px';
+    }, 50);
+
+
+    window.setTimeout(function () {
+      img.style.bottom = '-149px';
+    }, 4300);
+    window.setTimeout(function () {
+      if (img.parentNode) {
+        img.parentNode.removeChild(img);
+      }
+      if (shock.parentNode) {
+        shock.parentNode.removeChild(shock);
+      }
+    }, 5400);
+
+  };
+
+  koggy();
+}
+
+
+
 export function pikachu() {
   "use strict";
 
