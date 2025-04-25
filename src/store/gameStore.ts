@@ -1,7 +1,7 @@
 import { createStore } from "solid-js/store";
 import { moveLeft, moveRight, moveUp, moveDown, addRandomTile, checkGameOver } from "../logic/gameLogic";
 import { batch } from "solid-js";
-
+import { pikachu } from '../logic/easterEggs'
 export type GameState = {
   board: number[][];
   score: number;
@@ -72,6 +72,7 @@ export const useGameStore = () => {
 
   // Reset the game
   const resetGame = () => {
+    pikachu();
     initGame();
   };
 

@@ -50,7 +50,7 @@ export function useSwipe(options: UseSwipeOptions) {
     }
   };
   
-  const handleTouchEnd = (e: Event) => {
+  const handleTouchEnd = () => {
     if (!isSwipeInProgress) return;
     
     isSwipeInProgress = false;
@@ -108,7 +108,7 @@ export function useSwipe(options: UseSwipeOptions) {
     endY = mouseEvent.clientY;
   };
   
-  const handleMouseEnd = (e: Event) => {
+  const handleMouseEnd = () => {
     isSwipeInProgress = false;
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseEnd);
