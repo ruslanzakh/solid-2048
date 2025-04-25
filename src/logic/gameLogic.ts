@@ -3,7 +3,7 @@ import { Setter } from "solid-js";
 // Add a random tile (2 or 4) to an empty cell
 export const addRandomTile = (
   board: number[][],
-  setBoard: (board: number[][] | ((prev: number[][]) => number[][])) => void
+  setBoard: (board: number[][] | ((prev: number[][]) => number[][]), saveHistory: boolean) => void
 ): {row: number, col: number} | null => {
   // Find all empty cells
   const emptyCells: {row: number, col: number}[] = [];
@@ -31,7 +31,7 @@ export const addRandomTile = (
   // Update the board
   const newBoard = board.map(rowArray => [...rowArray]);
   newBoard[row][col] = newValue;
-  setBoard(newBoard);
+  setBoard(newBoard, false);
   
   // Return the position of the new tile
   return {row, col};

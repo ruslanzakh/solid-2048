@@ -4,11 +4,29 @@ import { batch } from "solid-js";
 // @ts-ignore
 import { koggy, pikachu, cool, wink, winner, jump, unicorn, joker, doggy } from '../logic/easterEggs';
 
-// Тип для сохранения полного состояния игры
+// Key for localStorage
+const GAME_STATE_KEY = '2048_game_state';
+
+// Type for saving the full game state
 type GameHistoryState = {
   board: number[][];
   score: number;
   newTile: {row: number, col: number};
+};
+
+// Type for saving in localStorage (only necessary fields)
+type SavedGameState = {
+  board: number[][];
+  score: number;
+  newTile: {row: number, col: number};
+  has64Appeared: boolean;
+  has128Appeared: boolean;
+  has256Appeared: boolean;
+  has512Appeared: boolean; 
+  has1024Appeared: boolean;
+  has2048Appeared: boolean;
+  history: GameHistoryState[];
+  undoCounter: number;
 };
 
 export type GameState = {
@@ -22,36 +40,95 @@ export type GameState = {
   has512Appeared: boolean;
   has1024Appeared: boolean;
   has2048Appeared: boolean;
-  // История предыдущих состояний
+  // History of previous states
   history: GameHistoryState[];
-  // Можно ли отменить ход
+  // Can undo a move
   canUndo: boolean;
-  // Счетчик для чередования пасхалок при отмене хода
+  // Counter for alternating easter eggs when undoing a move
   undoCounter: number;
 };
 
+// Function for saving the state to localStorage
+const saveGameToLocalStorage = (state: GameState) => {
+  const savedState: SavedGameState = {
+    board: state.board,
+    score: state.score,
+    newTile: state.newTile,
+    has64Appeared: state.has64Appeared,
+    has128Appeared: state.has128Appeared,
+    has256Appeared: state.has256Appeared,
+    has512Appeared: state.has512Appeared,
+    has1024Appeared: state.has1024Appeared,
+    has2048Appeared: state.has2048Appeared,
+    history: state.history,
+    undoCounter: state.undoCounter
+  };
+  
+  try {
+    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(savedState));
+  } catch (e) {
+    console.error('Failed to save game state to localStorage:', e);
+  }
+};
+
+// Function for loading the state from localStorage
+const loadGameFromLocalStorage = (): SavedGameState | null => {
+  try {
+    const savedState = localStorage.getItem(GAME_STATE_KEY);
+    if (!savedState) return null;
+    
+    const parsedState = JSON.parse(savedState) as SavedGameState;
+    return parsedState;
+  } catch (e) {
+    console.error('Failed to load game state from localStorage:', e);
+    return null;
+  }
+};
+
 export const useGameStore = () => {
-  // Initial game state
-  const [state, setState] = createStore<GameState>({
-    board: [
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0]
-    ],
-    score: 0,
-    gameOver: false,
-    newTile: {row: -1, col: -1},
-    has64Appeared: false,
-    has128Appeared: false,
-    has256Appeared: false,
-    has512Appeared: false,
-    has1024Appeared: false,
-    has2048Appeared: false,
-    history: [],
-    canUndo: false,
-    undoCounter: 0
-  });
+  // Initial game state - try to load from localStorage or use default
+  const loadedState = loadGameFromLocalStorage();
+  
+  const getInitialState = (): GameState => {
+    const loadedState = loadGameFromLocalStorage();
+    if (loadedState) {
+      return {
+        ...loadedState,
+        gameOver: false, // Always reset gameOver when loading
+        canUndo: loadedState.history.length > 0
+      };
+    }
+    return {
+      board: [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ],
+      score: 0,
+      gameOver: false,
+      newTile: {row: -1, col: -1},
+      has64Appeared: false,
+      has128Appeared: false,
+      has256Appeared: false,
+      has512Appeared: false,
+      has1024Appeared: false,
+      has2048Appeared: false,
+      history: [],
+      canUndo: false,
+      undoCounter: 0
+    };
+  };
+  
+  const [state, setState] = createStore<GameState>(getInitialState());
+
+  // Save to localStorage when state changes
+  const saveStateToLocalStorage = () => {
+    saveGameToLocalStorage(state);
+  };
+
+  // Flag for tracking if the game was loaded from localStorage
+  let isGameLoadedFromStorage = !!loadedState;
 
   const checkEasterEggs = () => {
     if(!checkFor64Tile()) return;
@@ -82,6 +159,9 @@ export const useGameStore = () => {
     
     setState('history', newHistory);
     setState('canUndo', true);
+    
+    // Сохраняем обновленное состояние в localStorage
+    saveStateToLocalStorage();
   };
   
   // Function for returning to the previous state
@@ -108,19 +188,32 @@ export const useGameStore = () => {
       setState('newTile', {...lastState.newTile});
       setState('history', newHistory);
       setState('canUndo', newHistory.length > 0);
+      
+      // Сохраняем обновленное состояние в localStorage
+      saveStateToLocalStorage();
     });
     
     return true;
   };
 
-  const setBoard = (board: number[][] | ((prev: number[][]) => number[][])) => {
-    // Теперь мы не сохраняем состояние здесь, а делаем это явно в функции makeMove
+  const setBoard = (board: number[][] | ((prev: number[][]) => number[][]), saveHistory: boolean = true) => {
+    // Save the current state before making the move
+    if(saveHistory) {
+      saveStateToHistory();
+    }
+
     setState("board", board);
     checkEasterEggs();
+    
+    // Сохраняем обновленное состояние в localStorage
+    saveStateToLocalStorage();
   };
 
   const setScore = (score: number | ((prev: number) => number)) => {
     setState("score", score);
+    
+    // Сохраняем обновленное состояние в localStorage
+    saveStateToLocalStorage();
   };
   
   // Общая функция для проверки наличия плитки определенного значения
@@ -142,6 +235,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(64)) {
       setState('has64Appeared', true);
       koggy();
+      
       return true
     }
     return false
@@ -153,6 +247,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(128)) {
       setState('has128Appeared', true);
       cool();
+      
       return true
     }
     return false
@@ -164,6 +259,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(256)) {
       setState('has256Appeared', true);
       wink();
+      
       return true
     }
     return false
@@ -175,6 +271,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(512)) {
       setState('has512Appeared', true);
       winner();
+      
       return true
     }
     return false
@@ -186,6 +283,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(1024)) {
       setState('has1024Appeared', true);
       jump();
+      
       return true
     }
     return false
@@ -197,6 +295,7 @@ export const useGameStore = () => {
     if (hasTileWithValue(2048)) {
       setState('has2048Appeared', true);
       unicorn();
+      
       return true
     }
     return false
@@ -210,6 +309,9 @@ export const useGameStore = () => {
     
     if (newTilePosition) {
       setState("newTile", newTilePosition);
+      
+      // Save the updated state to localStorage
+      saveStateToLocalStorage();
     }
   };
 
@@ -218,14 +320,15 @@ export const useGameStore = () => {
     const isGameOver = checkGameOver(state.board);
     if (isGameOver) {
       setState("gameOver", true);
+      
+      // Save the updated state to localStorage
+      saveStateToLocalStorage();
     }
     return isGameOver;
   };
 
   // Make a move
   const makeMove = (moveFn: (board: number[][], setBoard: any, setScore: any) => boolean) => {
-    // Save the current state before making the move
-    saveStateToHistory();
     
     // Perform the move
     const moved = moveFn(state.board, setBoard, setScore);
@@ -241,35 +344,29 @@ export const useGameStore = () => {
   // Initialize the game
   const initGame = () => {
     batch(() => {
-      setState({
-        board: [
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0]
-        ],
-        score: 0,
-        gameOver: false,
-        newTile: {row: -1, col: -1},
-        has64Appeared: false,
-        has128Appeared: false,
-        has256Appeared: false,
-        has512Appeared: false,
-        has1024Appeared: false,
-        has2048Appeared: false,
-        history: [],
-        canUndo: false,
-        undoCounter: 0
-      });
+      setState(getInitialState());
     
-      // Add initial tiles without saving history
-      addRandomTileInternal();
-      addRandomTileInternal();
+      // Если игра не была загружена из localStorage, добавляем начальные тайлы
+      if (!isGameLoadedFromStorage) {
+        // Add initial tiles without saving history
+        addRandomTileInternal();
+        addRandomTileInternal();
+        
+        // Save the initial state to localStorage
+        saveStateToLocalStorage();
+      } else {
+        // Reset the flag, since initialization is already completed
+        isGameLoadedFromStorage = false;
+      }
     });
   };
 
   // Reset the game
   const resetGame = () => {
+    // Clear localStorage before initializing a new game
+    localStorage.removeItem(GAME_STATE_KEY);
+    // Reset the flag indicating that the game was loaded from storage
+    isGameLoadedFromStorage = false;
     initGame();
     pikachu();
   };
