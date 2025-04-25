@@ -4,6 +4,7 @@ import { Tile } from './Tile.tsx';
 type BoardProps = {
   board: number[][];
   newTile: {row: number, col: number};
+  animationsEnabled?: boolean;
 };
 
 const isNewTile = (row: number, col: number, newTile: {row: number, col: number}) => {
@@ -22,6 +23,7 @@ export function Board(props: BoardProps) {
               <Tile 
                 value={cell} 
                 isNew={isNewTile(rowIndex(), colIndex(), props.newTile)} 
+                animationsEnabled={props.animationsEnabled}
               />
             }
           </For>

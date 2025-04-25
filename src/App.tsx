@@ -9,7 +9,7 @@ import { useSwipe, Direction } from './hooks/useSwipe'
 
 function App() {
   const gameStore = useGameStore();
-  const { state, initGame, resetGame, handleKeyDown, undoMove } = gameStore;
+  const { state, initGame, resetGame, handleKeyDown, undoMove, toggleAnimations } = gameStore;
   const [boardRef, setBoardRef] = createSignal<HTMLDivElement | null>(null);
 
   // Function for handling movements (from buttons or swipes)
@@ -65,7 +65,16 @@ function App() {
       <div class="w-full max-w-md p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-colors">
         <div class="flex justify-between items-center mb-4">
           <h1 class="text-2xl sm:text-4xl font-bold text-center text-gray-900 dark:text-white">2048</h1>
-          <ThemeToggle />
+          <div class="flex gap-2">
+            <button 
+              onClick={toggleAnimations} 
+              class="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer"
+              title={state.animationsEnabled ? "Disable animations" : "Enable animations"}
+            >
+              {state.animationsEnabled ? "🎬" : "⏸️"}
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
         <ScoreBoard 
           score={state.score} 
@@ -74,7 +83,7 @@ function App() {
           canUndo={state.canUndo}
         />
         <div ref={setBoardRef} class="touch-none">
-          <Board board={state.board} newTile={state.newTile} />
+          <Board board={state.board} newTile={state.newTile} animationsEnabled={state.animationsEnabled} />
         </div>
         <GameOver isGameOver={state.gameOver} />
         

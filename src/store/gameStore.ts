@@ -27,6 +27,7 @@ type SavedGameState = {
   has2048Appeared: boolean;
   history: GameHistoryState[];
   undoCounter: number;
+  animationsEnabled: boolean;
 };
 
 export type GameState = {
@@ -46,6 +47,8 @@ export type GameState = {
   canUndo: boolean;
   // Counter for alternating easter eggs when undoing a move
   undoCounter: number;
+  // Animation enabled flag
+  animationsEnabled: boolean;
 };
 
 // Function for saving the state to localStorage
@@ -61,7 +64,8 @@ const saveGameToLocalStorage = (state: GameState) => {
     has1024Appeared: state.has1024Appeared,
     has2048Appeared: state.has2048Appeared,
     history: state.history,
-    undoCounter: state.undoCounter
+    undoCounter: state.undoCounter,
+    animationsEnabled: state.animationsEnabled
   };
   
   try {
@@ -95,7 +99,8 @@ export const useGameStore = () => {
       return {
         ...loadedState,
         gameOver: false, // Always reset gameOver when loading
-        canUndo: loadedState.history.length > 0
+        canUndo: loadedState.history.length > 0,
+        animationsEnabled: loadedState.animationsEnabled !== undefined ? loadedState.animationsEnabled : true
       };
     }
     return {
@@ -116,7 +121,8 @@ export const useGameStore = () => {
       has2048Appeared: false,
       history: [],
       canUndo: false,
-      undoCounter: 0
+      undoCounter: 0,
+      animationsEnabled: true
     };
   };
   
@@ -160,7 +166,7 @@ export const useGameStore = () => {
     setState('history', newHistory);
     setState('canUndo', true);
     
-    // Сохраняем обновленное состояние в localStorage
+    // Save the updated state to localStorage
     saveStateToLocalStorage();
   };
   
@@ -172,10 +178,12 @@ export const useGameStore = () => {
     const lastState = state.history[0];
     const newHistory = state.history.slice(1);
     
-    if (state.undoCounter % 2 === 0) {
-      joker();
-    } else {
-      doggy();
+    if (state.animationsEnabled) {
+      if (state.undoCounter % 2 === 0) {
+        joker();
+      } else {
+        doggy();
+      }
     }
     
     // Increase the counter of clicks
@@ -189,7 +197,7 @@ export const useGameStore = () => {
       setState('history', newHistory);
       setState('canUndo', newHistory.length > 0);
       
-      // Сохраняем обновленное состояние в localStorage
+      // Save the updated state to localStorage
       saveStateToLocalStorage();
     });
     
@@ -205,18 +213,18 @@ export const useGameStore = () => {
     setState("board", board);
     checkEasterEggs();
     
-    // Сохраняем обновленное состояние в localStorage
+    // Save the updated state to localStorage
     saveStateToLocalStorage();
   };
 
   const setScore = (score: number | ((prev: number) => number)) => {
     setState("score", score);
     
-    // Сохраняем обновленное состояние в localStorage
+    // Save the updated state to localStorage
     saveStateToLocalStorage();
   };
   
-  // Общая функция для проверки наличия плитки определенного значения
+  // General function to check for a tile with specific value
   const hasTileWithValue = (value: number): boolean => {
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 4; col++) {
@@ -228,13 +236,15 @@ export const useGameStore = () => {
     return false;
   };
   
-  // Функция для проверки наличия плитки 64
+  // Function to check for 64 tile
   const checkFor64Tile = () => {
     if (state.has64Appeared) return true;
     
     if (hasTileWithValue(64)) {
       setState('has64Appeared', true);
-      koggy();
+      if (state.animationsEnabled) {
+        koggy();
+      }
       
       return true
     }
@@ -246,7 +256,9 @@ export const useGameStore = () => {
     
     if (hasTileWithValue(128)) {
       setState('has128Appeared', true);
-      cool();
+      if (state.animationsEnabled) {
+        cool();
+      }
       
       return true
     }
@@ -258,7 +270,9 @@ export const useGameStore = () => {
     
     if (hasTileWithValue(256)) {
       setState('has256Appeared', true);
-      wink();
+      if (state.animationsEnabled) {
+        wink();
+      }
       
       return true
     }
@@ -270,7 +284,9 @@ export const useGameStore = () => {
     
     if (hasTileWithValue(512)) {
       setState('has512Appeared', true);
-      winner();
+      if (state.animationsEnabled) {
+        winner();
+      }
       
       return true
     }
@@ -282,7 +298,9 @@ export const useGameStore = () => {
     
     if (hasTileWithValue(1024)) {
       setState('has1024Appeared', true);
-      jump();
+      if (state.animationsEnabled) {
+        jump();
+      }
       
       return true
     }
@@ -294,7 +312,9 @@ export const useGameStore = () => {
     
     if (hasTileWithValue(2048)) {
       setState('has2048Appeared', true);
-      unicorn();
+      if (state.animationsEnabled) {
+        unicorn();
+      }
       
       return true
     }
@@ -346,7 +366,7 @@ export const useGameStore = () => {
     batch(() => {
       setState(getInitialState());
     
-      // Если игра не была загружена из localStorage, добавляем начальные тайлы
+      // If the game was not loaded from localStorage, add initial tiles
       if (!isGameLoadedFromStorage) {
         // Add initial tiles without saving history
         addRandomTileInternal();
@@ -363,12 +383,26 @@ export const useGameStore = () => {
 
   // Reset the game
   const resetGame = () => {
+    // Save the current animation setting
+    const currentAnimationsEnabled = state.animationsEnabled;
+    
     // Clear localStorage before initializing a new game
     localStorage.removeItem(GAME_STATE_KEY);
     // Reset the flag indicating that the game was loaded from storage
     isGameLoadedFromStorage = false;
+    
+    // Initialize the game
     initGame();
-    pikachu();
+    
+    // Restore animation setting
+    setState('animationsEnabled', currentAnimationsEnabled);
+    
+    // Save updated state to localStorage with restored animation setting
+    saveStateToLocalStorage();
+    
+    if (currentAnimationsEnabled) {
+      pikachu();
+    }
   };
 
   // Handle key press
@@ -403,12 +437,19 @@ export const useGameStore = () => {
     });
   };
 
+  // Toggle animations
+  const toggleAnimations = () => {
+    setState('animationsEnabled', !state.animationsEnabled);
+    saveStateToLocalStorage();
+  };
+
   // Return state and methods to work with it
   return {
     state,
     initGame,
     resetGame,
     handleKeyDown,
-    undoMove
+    undoMove,
+    toggleAnimations
   };
 }; 

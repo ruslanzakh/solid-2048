@@ -1,6 +1,7 @@
 type TileProps = {
   value: number;
   isNew?: boolean;
+  animationsEnabled?: boolean;
 };
 
 export function Tile(props: TileProps) {
@@ -22,7 +23,7 @@ export function Tile(props: TileProps) {
     }
   };
 
-  const animationClass = props.isNew && props.value !== 0 ? 'tile-appear' : '';
+  const animationClass = props.isNew && props.value !== 0 && props.animationsEnabled !== false ? 'tile-appear' : '';
   return (
     <div class={`w-full h-auto aspect-square flex items-center justify-center rounded font-bold text-base sm:text-xl ${getTileClass(props.value)} transition-colors ${animationClass} select-none pointer-events-none`}>
       {props.value !== 0 ? props.value : ''}
